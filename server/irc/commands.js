@@ -976,7 +976,24 @@ handlers = {
         var params = _.clone(command.params);
         params.shift();
         genericNotice.call(this, command, params.join(', ') + ' ' + command.trailing);
-    }
+    },
+
+    'TYPING': function (command) {
+        var tmp, namespace, time;
+
+        // Check if we have a server-time
+        time = getServerTime.call(this, command);
+            // A message to a user (private message) or to a channel?
+        namespace = (command.params[0].toLowerCase() == this.irc_connection.nick.toLowerCase()) ? 'user ' + command.nick : 'channel ' + command.params[0];
+        this.irc_connection.emit(namespace + ' typing', {
+            nick: command.nick,
+            ident: command.ident,
+            hostname: command.hostname,
+            channel: command.params[0],
+            typing: command.trailing,
+            time: time
+        });
+     }
 };
 
 

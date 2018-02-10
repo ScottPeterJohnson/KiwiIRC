@@ -6,22 +6,17 @@ _kiwi.view.ControlBox = Backbone.View.extend({
 
     initialize: function () {
         var that = this;
-	    this.untypingTimeout = null;
-        console.log('Initializing new text area code!');
-        this.$('.inp').previousHeight = this.$('.inp').height();
-        this.$('.inp').autogrow({
-            postGrowCallback : function ($this) {
-                setTimeout(function() { 
-                            $('.panel_container')[0].scrollTop += 99999; //($this.height() - $this.previousHeight);
-                            //console.log("New pos: " + $('.panel_container')[0].scrollTop);
-                            $('.panels, .memberlists_resize_panel, .memberlists').css('bottom',$this.height());
-                            $('.controlbox').height($this.height());
-                            $this.previousHeight = $this.height();
-                            document.querySelector("#kiwi").scrollTop = 0
-                }, 0);
-            }
-	    });
-	    console.log('Initializing done.');
+	
+	console.log('Initializing new text area code!');
+	setTimeout(function () { //Allow time for the process event handler to be registered first
+		this.$('.inp').autogrow({
+			postGrowCallback : function ($this) {
+				$('.panels, .memberlists_resize_panel, .memberlists').css('bottom',$this.height());
+				$('.controlbox').height($this.height());
+			}
+		});
+	}), 50);
+	console.log('Initializing done.');
 
         this.buffer = [];  // Stores previously run commands
         this.buffer_pos = 0;  // The current position in the buffer
@@ -56,27 +51,7 @@ _kiwi.view.ControlBox = Backbone.View.extend({
             inp = $(ev.currentTarget),
             inp_val = inp.val(),
             meta;
-        var connection = _kiwi.app.connections.active_connection;
-        var channel = _kiwi.app.panels().active;
-        if (connection && channel && channel.get && !ev.shiftKey && !ev.altKey && !ev.ctrlKey) {
-	    this.untypingTimeout = this.untypingTimeout || {};
-            channel = channel.get('name');
-	    var panel = _kiwi.app.panels().active.get('name')
-            if (this.untypingTimeout[panel] != null) { clearTimeout(this.untypingTimeout[panel]); }
-            else {
-                console.log("Typing begin.");
-                //_kiwi.gateway.typing(connection,channel,true);
-                that.trigger('command:typing', {command: "typing", params: [panel, '1']});
-                }
-            this.untypingTimeout[panel] = setTimeout(function() {
-                console.log("Typing timeout.");
-                //_kiwi.gateway.typing(connection,channel,false);
-                that.trigger('command:typing', {command: "typing", params: [panel, '0']});
-                that.untypingTimeout[panel] = null;
-             }, 5000);
-        } else {
-            //console.log("Could not find connection or channel for typing event: " + connection + ", " + channel);
-        }
+
         if (navigator.appVersion.indexOf("Mac") !== -1) {
             meta = ev.metaKey;
         } else {
@@ -91,10 +66,10 @@ _kiwi.view.ControlBox = Backbone.View.extend({
         }
         
         switch (true) {
-	case (ev.keyCode === 13 && (ev.ctrlKey || ev.shiftKey) ): //ctrl + return = newline
-		//inp.val(function (i,val) { return val + "\n" });
+	case (ev.keyCode === 13 && ev.ctrlKey ): //ctrl + return = newline
+		inp.val(function (i,val) { return val + "\n" });
 		break;
-        case (ev.keyCode === 13 && !ev.ctrlKey && !ev.shiftKey ):              // return
+        case (ev.keyCode === 13 && !ev.ctrlKey ):              // return
             inp_val = inp_val.trim();
 
             if (inp_val) {

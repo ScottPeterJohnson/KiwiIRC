@@ -20,6 +20,7 @@ _kiwi.global = {
     utils: undefined, // TODO: Re-usable methods
     user: undefined, // TODO: Limited user methods
     server: undefined, // TODO: Limited server methods
+    customColors: { },
 
     // TODO: think of a better term for this as it will also refer to queries
     channels: undefined, // TODO: Limited access to panels list

@@ -82,6 +82,7 @@ if (global.config.module_dir) {
 global.clients = {
     clients: Object.create(null),
     addresses: Object.create(null),
+    customColors: { },
 
     // Local and foriegn port pairs for identd lookups
     // {'65483_6667': client_obj, '54356_6697': client_obj}

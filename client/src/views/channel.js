@@ -109,13 +109,24 @@ _kiwi.view.Channel = _kiwi.view.Panel.extend({
 
         // Add some colours to the nick (Method based on IRSSIs nickcolor.pl)
         nick_colour_hex = (function (nick) {
+            /*var customColors = {Fel:"#660000", Moogle:"#999999"};
+            if (customColors[nick])
+                return customColors[nick];*/
+	    
+	    if (_kiwi.global.customColors[nick])
+		return _kiwi.global.customColors[nick];
+
             var nick_int = 0, rgb;
 
             _.map(nick.split(''), function (i) { nick_int += i.charCodeAt(0); });
-            rgb = hsl2rgb(nick_int % 255, 70, 35);
-            rgb = rgb[2] | (rgb[1] << 8) | (rgb[0] << 16);
+	    function random(seed) {
+		var x = Math.sin(seed) * 10000;
+		return x - Math.floor(x);	
+            }
+            rgb = hsl2rgb(random(nick_int) * 185, 80, 35);
+            //rgb = rgb[2] | (rgb[1] << 8) | (rgb[0] << 16);
 
-            return '#' + rgb.toString(16);
+            return '#' + Math.ceil(rgb[0]).toString(16) + Math.ceil(rgb[1]).toString(16) + Math.ceil(rgb[2]).toString(16);
         })(msg.nick);
 
         msg.nick_style = 'color:' + nick_colour_hex + ';';
@@ -140,7 +151,7 @@ _kiwi.view.Channel = _kiwi.view.Panel.extend({
         // Build up and add the line
         msg.msg_css_classes = msg_css_classes;
         msg.time_string = msg.time.getHours().toString().lpad(2, "0") + ":" + msg.time.getMinutes().toString().lpad(2, "0") + ":" + msg.time.getSeconds().toString().lpad(2, "0");
-        line_msg = '<div class="msg <%= type %> <%= msg_css_classes %>"><div class="time"><%- time_string %></div><div class="nick" style="<%= nick_style %>"><%- nick %></div><div class="text" style="<%= style %>"><%= msg %> </div></div>';
+        line_msg = '<div class="msg <%= type %> <%= msg_css_classes %>"><span style="position: absolute; left: -9999px;">[</span><span class="time"><%- time_string %></span><span style="position: absolute; left: -9999px;">] </span><span class="nick" style="<%= nick_style %>"><%- nick %></span><span style="position: absolute; left: -9999px;">: </span><span class="text" style="<%= style %>"><%= msg %></span></div>';
         this.$messages.append(_.template(line_msg, msg));
 
         // Activity/alerts based on the type of new message

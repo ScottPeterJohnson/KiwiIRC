@@ -49,6 +49,9 @@ var Client = function (websocket) {
     });
 
     this.disposed = false;
+
+    //Added by Moogle
+    this.sendKiwiCommand('colors', {colors: global.clients.customColors});
 };
 util.inherits(Client, events.EventEmitter);
 
@@ -82,8 +85,10 @@ function handleClientMessage(msg, callback) {
 
     // Make sure we have a server number specified
     if ((msg.server === null) || (typeof msg.server !== 'number')) {
+        console.log("Server not specified for " + msg);
         return (typeof callback === 'function') ? callback('server not specified') : undefined;
     } else if (!this.state.irc_connections[msg.server]) {
+        console.log("Not connected to server for " + msg);
         return (typeof callback === 'function') ? callback('not connected to server') : undefined;
     }
 
@@ -102,6 +107,7 @@ function handleClientMessage(msg, callback) {
     }
 
     // Run the client command
+    console.log("Running command with method " + msg.data.method + " and args " + msg.data.args);
     this.client_commands.run(msg.data.method, msg.data.args, server, callback);
 }
 

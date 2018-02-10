@@ -223,6 +223,47 @@ function formatToIrcMsg(message) {
         return String.fromCharCode(3) + colour_number.toString();
     });
 
+    //Added by Moogle
+    //Asterisks to bold, underscores to italics
+    var pat = /["'!\-(),. \x02\x1D*_?]/;
+    message = " " + message + " ";
+
+    for (var i = 0; i < 2; i++) {
+        var arr = [["*", "\x02"], ["_", "\x1D"]];
+        chr = arr[i][0];
+        repl = arr[i][1];
+        var cur = message.indexOf(chr);
+        while (cur != -1) {
+  	    var repeated = false;
+            while (message.charAt(cur + 1) == chr) {
+                cur++;
+                repeated = true;
+            }
+            if (repeated) {
+                cur = message.indexOf(chr, cur + 1);
+                continue;
+            }
+
+            if (pat.test(message.charAt(cur - 1)) || pat.test(message.charAt(cur + 1))) {
+                var cur2 = cur + 1;
+                cur2 = message.indexOf(chr, cur2);
+                while (cur2 != -1) {
+                    if (pat.test(message.charAt(cur2 - 1)) || pat.test(message.charAt(cur2 + 1))) {
+                        message = message.substr(0, cur) + repl + message.substr(cur + 1, cur2 - cur - 1) + repl + message.substr(cur2 + 1);
+                        cur = cur2;
+                        break;
+                    }
+                    cur2 = cur2 + 1;
+                    cur2 = message.indexOf(chr, cur2); 
+                }
+            }
+            cur = cur + 1;
+            cur = message.indexOf(chr, cur);
+        }
+    }
+
+    message = message.substr(1, message.length - 2);   
+     
     var formatters = {
         B: '\x02',    // Bold
         I: '\x1D',    // Italics

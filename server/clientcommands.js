@@ -9,8 +9,10 @@ var ClientCommands = function (client) {
 module.exports = ClientCommands;
 
 ClientCommands.prototype.run = function (command, args, irc_connection, callback) {
+    console.log("Received command " + command);
     // Do we have a function to handle this command?
     if (!listeners[command.toUpperCase()]) {
+        console.log("No handler for command " + command)
         return;
     }
 
@@ -159,6 +161,29 @@ var listeners = {
     ENCODING: function (args, irc_connection, callback) {
         if (args.encoding) {
             return callback(irc_connection.setEncoding(args.encoding));
+        }
+    },
+
+    TYPING: function (args, irc_connection, callback) {
+        console.log("Typing command received from connected client.");
+        console.log(args);
+        if (args.target && args.typing) {
+            irc_connection.write('TYPING ' + args.target + ' :' + args.typing, callback);
+        }
+    },
+
+    COLORCHANGE: function (args, irc_connection, callback) {
+        console.log("Color change command received from connected client.");
+        console.log(args);
+        data = {
+            nick: irc_connection.nick,
+            color: args.color
+        };
+	console.log(data);
+        if (/^#[0-9a-fA-F]{6}$/.test(args.color)) {
+            console.log("Color valid, broadcasting.");
+            global.clients.broadcastKiwiCommand('colorChange', data);
+            global.clients.customColors[irc_connection.nick] = args.color;
         }
     }
 };

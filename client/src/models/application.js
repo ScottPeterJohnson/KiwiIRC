@@ -664,12 +664,15 @@ _kiwi.model.Application = function () {
             controlbox.on('command:applet', appletCommand);
             controlbox.on('command:settings', settingsCommand);
             controlbox.on('command:script', scriptCommand);
+            controlbox.on('command:typing', typingCommand);
+            controlbox.on('command:color', function (ev) {
+                _kiwi.gateway.colorChange(null, ev.params[0]);
+            });
         };
 
         // A fallback action. Send a raw command to the server
         function unknownCommand (ev) {
             var raw_cmd = ev.command + ' ' + ev.params.join(' ');
-            console.log('RAW: ' + raw_cmd);
             _kiwi.gateway.raw(null, raw_cmd);
         }
 
@@ -973,7 +976,20 @@ _kiwi.model.Application = function () {
             });
         }
 
+        function typingCommand (ev) {
+            var destination = ev.params[0],
+                panel = that.connections.active_connection.panels.getByName(destination) || that.panels().server;
 
+            ev.params.shift();
+            _kiwi.gateway.typing(null, destination, ev.params[0]);
+
+            members = panel.get('members');
+            if (members) { 
+		user = members.getByNick(_kiwi.app.connections.active_connection.get('nick'));
+            	var $img = user.view.$el.find("img");
+            	$img.toggle(ev.params[0] != "0");
+		}
+        }
 
 
 

@@ -129,6 +129,24 @@ _kiwi.model.Gateway = function () {
             that.trigger('join', event);
         });
 
+        //Added 6/8/2014 by Fel
+        this.on('ontyping', function(event) {
+            var source,
+                connection = _kiwi.app.connections.getByConnectionId(event.server),
+                is_pm = (event.channel.toLowerCase() == connection.get('nick').toLowerCase());
+            source = is_pm ? event.nick : event.channel;
+            that.trigger('typing:' + source, event);
+            that.trigger('typing', event);
+        });
+
+        //Added by Moogle
+        this.on('kiwi:colorChange', function(event) {
+            _kiwi.global.customColors[event.nick] = event.color;
+        });
+
+        this.on('kiwi:colors', function(event) {
+            _kiwi.global.customColors = event.colors;
+        });
     };
 
 
@@ -568,6 +586,18 @@ _kiwi.model.Gateway = function () {
         this.sendData(connection_id, data, callback);
     };
 
+    //Added by Moogle
+    this.colorChange = function (connection_id, new_color, callback) {
+        var data = {
+            method: 'colorChange',
+            args: {
+                color: new_color
+            }
+        };
+
+        this.sendData(connection_id, data, callback);
+    };
+
     /**
      *  Sends ENCODING change request to server.
      *  @param  {String}     new_encoding  The new proposed encode
@@ -600,6 +630,23 @@ _kiwi.model.Gateway = function () {
 
         this.sendData(data, callback);
     };
+
+    /**
+	 * Added 6/8/2014 by Fel. Sends a TYPING message.
+	 *   @param  {String}    target      The target of the message (e.g. a channel or nick)
+     *   @param  {String}    isTyping         0 or 1.
+     *   @param  {Function}  callback    A callback function
+	 */
+	this.typing = function (connection_id, target, isTyping, callback) {
+		var data = {
+			method: 'typing',
+			args: {
+				target: target,
+				typing: isTyping
+			}
+		};
+		this.sendData(connection_id, data, callback);
+	}
 
     // Check a nick alongside our ignore list
     this.isNickIgnored = function (nick) {

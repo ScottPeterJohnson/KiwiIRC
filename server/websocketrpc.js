@@ -134,9 +134,9 @@ WebsocketRpc.prototype._onMessage = function(message_raw) {
 
     if (this._isResponse(packet)) {
         // If we have no callback waiting for this response, don't do anything
-        if (typeof this._rpc_callbacks[packet.id] !== 'function')
+        if (typeof this._rpc_callbacks[packet.id] !== 'function') {
             return;
-
+        }
         // Delete the callback before calling it. If any exceptions accur within the callback
         // we don't have to worry about the delete not happening
         callback = this._rpc_callbacks[packet.id];

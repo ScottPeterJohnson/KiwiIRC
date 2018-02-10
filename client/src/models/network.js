@@ -100,7 +100,7 @@
 
 
         bindGatewayEvents: function () {
-            //this.gateway.on('all', function() {console.log('ALL', this.get('connection_id'), arguments);});
+            //this.gateway.on('all', function() {console.log('ALL', (this.get && this.get('connection_id')) || "???", arguments);});
 
             this.gateway.on('connect', onConnect, this);
             this.gateway.on('disconnect', onDisconnect, this);
@@ -134,6 +134,7 @@
             this.gateway.on('list_start', onListStart, this);
             this.gateway.on('irc_error', onIrcError, this);
             this.gateway.on('unknown_command', onUnknownCommand, this);
+            this.gateway.on('typing', onTyping, this);
         },
 
 
@@ -783,6 +784,48 @@
             display_params.push(event.trailing);
 
         this.panels.server.addMsg('', '[' + event.command + '] ' + display_params.join(', ', ''));
+    }
+
+    function onTyping(event) {
+        console.log("onTyping event triggered with data "+ event.typing + " from user " + event.nick + " in source " + event.channel);
+        console.log(event);
+         var panel;
+         var is_pm = (event.channel.toLowerCase() == this.get('nick').toLowerCase());
+
+        // An ignored user? don't do anything with it
+        if (_kiwi.gateway.isNickIgnored(event.nick)) {
+            console.log("onTyping event ignored: nick ignored");
+            return;
+        }
+
+        if (is_pm) {
+            panel = this.panels.getByName(event.nick);
+            if (!panel) {
+                console.log("onTyping event ignored; no panel")
+                return;
+            }
+
+        } else {
+             panel = this.panels.getByName(event.channel);
+            if (!panel) {
+                panel = this.panels.server;
+            }
+        }
+
+        members = panel.get('members');
+        if (!members) {
+            console.log("Could not find members in typing notification");
+            return;
+        }
+
+        user = members.getByNick(event.nick);
+        if (!user) {
+            console.log("Could not find user in typing notification");
+            return;
+        }
+        var $img = user.view.$el.find("img")
+        if (!$img) { console.log("Typing notification: Image not found."); }
+        $img.toggle(event.typing != "0");
     }
 }
 

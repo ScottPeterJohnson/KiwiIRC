@@ -28,7 +28,8 @@ var IrcUser = function (irc_connection, nick) {
         ctcp_response:  onCtcpResponse,
         privmsg:        onPrivmsg,
         ctcp_request:   onCtcpRequest,
-        mode:           onMode
+        mode:           onMode,
+        typing:         onTyping
     };
     EventBinder.bindIrcEvents('user ' + this.nick, this.irc_events, this, irc_connection);
 };
@@ -251,6 +252,17 @@ function onMode(event) {
         target: event.target,
         nick: event.nick,
         modes: event.modes,
+        time: event.time
+    });
+}
+
+function onTyping(event) {
+    this.irc_connection.clientEvent('typing', {
+        nick: event.nick,
+        ident: event.ident,
+        hostname: event.hostname,
+        channel: event.channel,
+        typing: event.typing,
         time: event.time
     });
 }

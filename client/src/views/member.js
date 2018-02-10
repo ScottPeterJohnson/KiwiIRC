@@ -9,7 +9,7 @@ _kiwi.view.Member = Backbone.View.extend({
             prefix_css_class = (this.model.get('modes') || []).join(' ');
 
         $this.attr('class', 'mode ' + prefix_css_class);
-        $this.html('<a class="nick"><span class="prefix">' + this.model.get("prefix") + '</span>' + this.model.get("nick") + '</a>');
+        $this.html('<a class="nick"><span class="prefix">' + this.model.get("prefix") + '</span>' + this.model.get("nick") + '<img src="/assets/img/typing.png" height="16" width="16" class="typing" style="display:none; margin-left:12px;"/>' + '</a>');
 
         return this;
     }
